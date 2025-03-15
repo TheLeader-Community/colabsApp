@@ -1,5 +1,6 @@
 "use client";
 
+import { Download, Folder, Play, PlaySquare, Upload, ZoomIn } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
@@ -16,15 +17,15 @@ const languages = [
   "html",
 ];
 
-// Map pour associer les langages avec les extensions appropriées
-const languageExtensions = {
+
+const languageExtensions: any = {
   javascript: "js",
   typescript: "ts",
   python: "py",
   java: "java",
   c: "c",
   cpp: "cpp",
-  node: "js",  // Associe 'node' à '.js'
+  node: "js",
   html: "html",
 };
 
@@ -33,15 +34,15 @@ export default function Editor() {
   const [code, setCode] = useState("// Code en " + language);
   const [output, setOutput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [fileName, setFileName] = useState("code");  // Nom par défaut du fichier
+  const [fileName, setFileName] = useState("code");
 
-  const customConsoleLog = (...args) => {
+  const customConsoleLog = (...args: any[]) => {
     setOutput((prevOutput) => prevOutput + "\n" + args.join(" "));
   };
 
   const executeCode = async () => {
     setIsLoading(true);
-    setOutput("");  // Réinitialiser la sortie à chaque nouvelle exécution
+    setOutput("");
 
     try {
       const response = await fetch("http://localhost:3000/api/runcode", {
@@ -58,11 +59,11 @@ export default function Editor() {
       const result = await response.json();
       setOutput(result.output || "Erreur dans l'exécution du code.");
 
-      // Si le langage est HTML, ouvrir un nouvel onglet avec le résultat
+
       if (language === "html") {
         const newWindow = window.open();
-        newWindow.document.write(result.output);
-        newWindow.document.close();
+        newWindow?.document.write(result.output);
+        newWindow?.document.close();
       }
 
     } catch (error) {
@@ -72,38 +73,38 @@ export default function Editor() {
     }
   };
 
-  // Fonction pour créer un fichier et le rendre téléchargeable avec un nom personnalisé
+
   const downloadFile = () => {
     const blob = new Blob([code], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
 
-    // Utilisation du nom de fichier saisi et de l'extension appropriée
-    const extension = languageExtensions[language] || "txt"; // Défaut à '.txt' si aucune extension définie
+
+    const extension = languageExtensions[language] || "txt";
     link.href = url;
-    link.download = `${fileName}.${extension}`;  // Ajout de l'extension appropriée
+    link.download = `${fileName}.${extension}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // Fonction pour modifier le nom du fichier
+
   const handleRename = () => {
     const newName = prompt("Entrez un nouveau nom pour le fichier:", fileName);
     if (newName && newName.trim() !== "") {
-      setFileName(newName.trim());  // Mettre à jour le nom du fichier
+      setFileName(newName.trim());
     }
   };
 
   return (
     <div className="w-full" style={{ height: "100vh" }}>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center">
         <select
-          className="p-2 border rounded bg-black text-white"
+          className=" p-2 rounded bg-blue-900 text-white"
           value={language}
           onChange={(e) => {
             setLanguage(e.target.value);
-            setCode(""); // Réinitialiser le code lorsqu'on change de langage
+            setCode("");
           }}
         >
           {languages.map((lang) => (
@@ -112,21 +113,9 @@ export default function Editor() {
             </option>
           ))}
         </select>
+
         <button
-          className="p-2 border rounded bg-blue-600 text-white"
-          onClick={executeCode}
-          disabled={isLoading}
-        >
-          {isLoading ? "Exécution..." : "Exécuter"}
-        </button>
-        <button
-          className="p-2 border rounded bg-green-600 text-white ml-2"
-          onClick={downloadFile}
-        >
-          Télécharger le fichier
-        </button>
-        <button
-          className="p-2 border rounded bg-yellow-600 text-white ml-2"
+          className="p-1 rounded bg-blue-600 text-white"
           onClick={handleRename}
         >
           Renommer
@@ -134,10 +123,10 @@ export default function Editor() {
       </div>
 
       <MonacoEditor
-        height="80%"
+        height="60%"
         language={language}
         value={code}
-        onChange={(newValue) => setCode(newValue)}
+        onChange={(newValue: any) => setCode(newValue)}
         theme="vs-dark"
         options={{
           fontSize: 14,
@@ -145,10 +134,40 @@ export default function Editor() {
           automaticLayout: true,
         }}
       />
-
-      {output && language !== "html" && (
-        <div className="mt-4 p-4 w-32 bg-gray-900 text-white">
-          <h3>Sortie :</h3>
+      <div className="p-1 bg-blue-800 flex gap-5 justify-between items-center">
+        <button 
+          className=" p-2 px-6 border-none text-xs rounded rounded-b-none bg-blue-500 text-white"
+          onClick={executeCode}
+          disabled={isLoading}
+        >
+          {isLoading ? "Exécution..." : <div className="flex  justify-center items-center"><Play size={15}></Play>Exécuter</div>}
+        </button>
+       
+        <button
+          className="  p-2 px-6 border-none text-xs rounded rounded-b-none flex justify-center items-center  bg-blue-500 text-white ml-2"
+          onClick={downloadFile}
+        >
+          <Download size={15}></Download>
+          Télécharger
+        </button>
+        <button
+          className="  p-2 px-6 border-none text-xs rounded rounded-b-none flex justify-center items-center  bg-blue-500 text-white ml-2"
+          onClick={downloadFile}
+        >
+          <Folder size={15}></Folder>
+          charger un fichier
+        </button>
+        <button
+          className="  p-2 px-6 border-none text-xs rounded rounded-b-none flex justify-center items-center  bg-blue-500 text-white ml-2"
+          onClick={downloadFile}
+        >
+          <ZoomIn size={15}></ZoomIn>
+          Zoomer
+        </button>
+      </div>
+      {language !== "html" && (
+        <div className="mt-1 p-4 w-full h-40 overflow-y-scroll bg-slate-950 text-white">
+          <h3>Resultat :</h3>
           <pre>{output}</pre>
         </div>
       )}
